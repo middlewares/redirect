@@ -13,13 +13,19 @@ class RedirectTest extends TestCase
 {
     public function provideRequests()
     {
+        $redirects = [
+            '/foo' => '/bar',
+        ];
+
         yield [
+            new Redirect($redirects),
             Factory::createServerRequest()->withUri(new Uri('/')),
             200,
             [],
         ];
 
         yield [
+            new Redirect($redirects),
             Factory::createServerRequest()->withUri(new Uri('/foo')),
             301,
             [
@@ -28,8 +34,41 @@ class RedirectTest extends TestCase
         ];
 
         yield [
+            (new Redirect($redirects))->permanent(false),
+            Factory::createServerRequest()->withUri(new Uri('/foo')),
+            302,
+            [
+                'Location' => ['/bar'],
+            ],
+        ];
+
+        yield [
+            new Redirect($redirects),
             Factory::createServerRequest()->withUri(new Uri('/foo?bar')),
-            301,
+            200,
+            [],
+        ];
+
+        yield [
+            new Redirect($redirects),
+            Factory::createServerRequest()->withUri(new Uri('/foo'))->withMethod('PUT'),
+            405,
+            [],
+        ];
+
+        yield [
+            (new Redirect($redirects))->method(['GET', 'POST']),
+            Factory::createServerRequest()->withUri(new Uri('/foo'))->withMethod('POST'),
+            308,
+            [
+                'Location' => ['/bar'],
+            ],
+        ];
+
+        yield [
+            (new Redirect($redirects))->method(['GET', 'POST'])->permanent(false),
+            Factory::createServerRequest()->withUri(new Uri('/foo'))->withMethod('POST'),
+            307,
             [
                 'Location' => ['/bar'],
             ],
@@ -39,15 +78,9 @@ class RedirectTest extends TestCase
     /**
      * @dataProvider provideRequests
      */
-    public function testRedirect(ServerRequestInterface $request, $expectedCode, $expectedHeaders)
+    public function testRedirect(Redirect $redirect, ServerRequestInterface $request, $expectedCode, $expectedHeaders)
     {
-        $redirects = [
-            '/foo' => '/bar',
-        ];
-
-        $response = Dispatcher::run([
-            new Redirect($redirects),
-        ], $request);
+        $response = Dispatcher::run([$redirect], $request);
 
         $this->assertSame($expectedCode, $response->getStatusCode());
         $this->assertSame($expectedHeaders, $response->getHeaders());
