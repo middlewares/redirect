@@ -34,7 +34,7 @@ final class Redirect implements MiddlewareInterface
      * @param bool $permanent
      * @return $this
      */
-    public function permanent($permanent)
+    public function permanent($permanent = true)
     {
         $this->permanent = $permanent;
         return $this;
@@ -79,6 +79,11 @@ final class Redirect implements MiddlewareInterface
         return Factory::createResponse($responseCode)->withAddedHeader('Location', $this->redirects[$uri]);
     }
 
+    /**
+     * Determine the response code according with the method and the permanent config
+     * @param  ServerRequestInterface $request
+     * @return integer
+     */
     private function determineResponseCode(ServerRequestInterface $request)
     {
         if (in_array($request->getMethod(), ['GET', 'HEAD', 'CONNECT', 'TRACE', 'OPTIONS'])) {
