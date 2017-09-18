@@ -8,6 +8,7 @@ use Middlewares\Utils\Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ArrayAccess;
+use InvalidArgumentException;
 
 final class Redirect implements MiddlewareInterface
 {
