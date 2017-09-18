@@ -22,7 +22,9 @@ final class Redirect implements MiddlewareInterface
     public function __construct($redirects)
     {
         if (!is_array($redirects) && !($redirects instanceof ArrayAccess)) {
-            throw new InvalidArgumentException('The redirects argument must be an array or implement the ArrayAccess interface');
+            throw new InvalidArgumentException(
+                'The redirects argument must be an array or implement the ArrayAccess interface'
+            );
         }
 
         $this->redirects = $redirects;
