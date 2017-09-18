@@ -7,6 +7,7 @@ use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Middlewares\Utils\Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use ArrayAccess;
 
 final class Redirect implements MiddlewareInterface
 {
@@ -15,11 +16,14 @@ final class Redirect implements MiddlewareInterface
     private $method = ['GET'];
 
     /**
-     * @param array $redirects
-     * @param $redirectCode
+     * @param array|ArrayAccess $redirects
      */
     public function __construct($redirects)
     {
+        if (!is_array($redirects) && !($redirects instanceof ArrayAccess)) {
+            throw new InvalidArgumentException('The redirects argument must be an array or implement the ArrayAccess interface');
+        }
+
         $this->redirects = $redirects;
     }
 
@@ -55,6 +59,7 @@ final class Redirect implements MiddlewareInterface
     {
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
+
         if (strlen($query) > 0) {
             $uri .= '?' . $query;
         }
@@ -73,18 +78,10 @@ final class Redirect implements MiddlewareInterface
 
     private function determineResponseCode(ServerRequestInterface $request)
     {
-        if ($request->getMethod() === 'GET' && $this->permanent === true) {
-            return 301;
+        if (in_array($request->getMethod(), ['GET', 'HEAD', 'CONNECT', 'TRACE', 'OPTIONS'])) {
+            return $this->permanent ? 301 : 302;
         }
 
-        if ($request->getMethod() === 'GET' && $this->permanent === false) {
-            return 302;
-        }
-
-        if ($this->permanent === true) {
-            return 308;
-        }
-
-        return 307;
+        return $this->permanent ? 308 : 307;
     }
 }

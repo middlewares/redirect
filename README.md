@@ -27,7 +27,7 @@ composer require middlewares/redirect
 
 ```php
 $dispatcher = new Dispatcher([
-	(new Middlewares\Redirect(['/foo' => '/bar']))
+	(new Middlewares\Redirect(['/old-url' => '/new-url']))
 		->permanent(false)
 		->method(['GET', 'POST'])
 ]);
@@ -37,9 +37,13 @@ $response = $dispatcher->dispatch(new ServerRequest());
 
 ## Options
 
+#### `__construct(array|ArrayAccess $redirects)`
+
+The list of urls that must be redirected. It can be an array or an object implementing the `ArrayAccess` interface.
+
 #### `permanent(bool $permanent)`
 
-Use or temporaty or permanent redirection HTTP status code for the response. (Default: `true`.)
+Use temporary or permanent redirection HTTP status code for the response. (Default: `true`.)
 
 #### `method(array $methods)`
 
@@ -62,4 +66,4 @@ The MIT License (MIT). Please see [LICENSE](LICENSE) for more information.
 [link-travis]: https://travis-ci.org/middlewares/redirect
 [link-scrutinizer]: https://scrutinizer-ci.com/g/middlewares/redirect
 [link-downloads]: https://packagist.org/packages/middlewares/redirect
-[link-sensiolabs]: https://insight.sensiolabs.com/projects/{project_id_here}
+[link-sensiolabs]: https://insight.sensiolabs.com/projects/e2df0b3f-ee64-4310-91e6-f7e53f024808
