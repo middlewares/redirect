@@ -27,9 +27,9 @@ composer require middlewares/redirect
 
 ```php
 $dispatcher = new Dispatcher([
-	(new Middlewares\Redirect())
-		->option1()
-		->option2($value)
+	(new Middlewares\Redirect(['/foo' => '/bar']))
+		->permanent(false)
+		->method(['GET', 'POST'])
 ]);
 
 $response = $dispatcher->dispatch(new ServerRequest());
@@ -37,13 +37,13 @@ $response = $dispatcher->dispatch(new ServerRequest());
 
 ## Options
 
-#### `option1()`
+#### `permanent(bool $permanent)`
 
-Option description
+Use or temporaty or permanent redirection HTTP status code for the response. (Default: `true`.)
 
-#### `option2($arg)`
+#### `method(array $methods)`
 
-Option description
+Array with allow HTTP request methods. (Default: `['GET']`.)
 
 ---
 
