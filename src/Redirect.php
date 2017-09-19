@@ -14,6 +14,7 @@ final class Redirect implements MiddlewareInterface
 {
     private $redirects = [];
     private $permanent = true;
+    private $query = true;
     private $method = ['GET'];
 
     /**
@@ -41,6 +42,16 @@ final class Redirect implements MiddlewareInterface
     }
 
     /**
+     * @param bool $query
+     * @return $this
+     */
+    public function query($query = true)
+    {
+        $this->query = $query;
+        return $this;
+    }
+
+    /**
      * @param array $method
      * @return $this
      */
@@ -63,7 +74,7 @@ final class Redirect implements MiddlewareInterface
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
 
-        if (strlen($query) > 0) {
+        if ($this->query && strlen($query) > 0) {
             $uri .= '?' . $query;
         }
 
