@@ -7,7 +7,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 [![SensioLabs Insight][ico-sensiolabs]][link-sensiolabs]
 
-Description of the middleware
+Middleware to redirect old urls to new urls SEO friendly.
 
 ## Requirements
 
