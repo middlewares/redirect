@@ -15,6 +15,7 @@ class RedirectTest extends TestCase
     {
         $redirects = [
             '/foo' => '/bar',
+            '/posts?id=133' => '/post/133',
         ];
 
         yield [
@@ -47,6 +48,31 @@ class RedirectTest extends TestCase
             Factory::createServerRequest()->withUri(new Uri('/foo?bar')),
             200,
             [],
+        ];
+
+        yield [
+            (new Redirect($redirects))->query(false),
+            Factory::createServerRequest()->withUri(new Uri('/foo?bar')),
+            301,
+            [
+                'Location' => ['/bar'],
+            ],
+        ];
+
+        yield [
+            (new Redirect($redirects))->query(false),
+            Factory::createServerRequest()->withUri(new Uri('/posts?id=133')),
+            200,
+            [],
+        ];
+
+        yield [
+            new Redirect($redirects),
+            Factory::createServerRequest()->withUri(new Uri('/posts?id=133')),
+            301,
+            [
+                'Location' => ['/post/133'],
+            ],
         ];
 
         yield [

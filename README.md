@@ -29,6 +29,7 @@ composer require middlewares/redirect
 $dispatcher = new Dispatcher([
 	(new Middlewares\Redirect(['/old-url' => '/new-url']))
 		->permanent(false)
+		->query(false)
 		->method(['GET', 'POST'])
 ]);
 
@@ -44,6 +45,10 @@ The list of urls that must be redirected. It can be an array or an object implem
 #### `permanent(bool $permanent)`
 
 Use temporary or permanent redirection HTTP status code for the response. (Default: `true`.)
+
+#### `query(bool $query)`
+
+Take the query part of the URI into account when matching redirects. (Default: `true`.)
 
 #### `method(array $methods)`
 
