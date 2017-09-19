@@ -103,6 +103,8 @@ class RedirectTest extends TestCase
 
     /**
      * @dataProvider provideRequests
+     * @param mixed $expectedCode
+     * @param mixed $expectedHeaders
      */
     public function testRedirect(Redirect $redirect, ServerRequestInterface $request, $expectedCode, $expectedHeaders)
     {

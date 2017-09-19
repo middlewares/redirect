@@ -2,13 +2,13 @@
 
 namespace Middlewares;
 
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
+use ArrayAccess;
+use Interop\Http\Server\MiddlewareInterface;
+use Interop\Http\Server\RequestHandlerInterface;
+use InvalidArgumentException;
 use Middlewares\Utils\Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use ArrayAccess;
-use InvalidArgumentException;
 
 final class Redirect implements MiddlewareInterface
 {
@@ -18,7 +18,7 @@ final class Redirect implements MiddlewareInterface
     private $method = ['GET'];
 
     /**
-     * @param array|ArrayAccess $redirects
+     * @param array|ArrayAccess $redirects [from => to]
      */
     public function __construct($redirects)
     {
@@ -32,7 +32,7 @@ final class Redirect implements MiddlewareInterface
     }
 
     /**
-     * @param bool $permanent
+     * @param  bool  $permanent
      * @return $this
      */
     public function permanent($permanent = true)
@@ -42,7 +42,7 @@ final class Redirect implements MiddlewareInterface
     }
 
     /**
-     * @param bool $query
+     * @param  bool  $query
      * @return $this
      */
     public function query($query = true)
@@ -52,7 +52,7 @@ final class Redirect implements MiddlewareInterface
     }
 
     /**
-     * @param array $method
+     * @param  array $method
      * @return $this
      */
     public function method(array $method)
@@ -64,12 +64,12 @@ final class Redirect implements MiddlewareInterface
     /**
      * Process a request and return a response.
      *
-     * @param ServerRequestInterface $request
-     * @param DelegateInterface      $delegate
+     * @param ServerRequestInterface  $request
+     * @param RequestHandlerInterface $handler
      *
      * @return ResponseInterface
      */
-    public function process(ServerRequestInterface $request, DelegateInterface $delegate)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler)
     {
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
@@ -79,7 +79,7 @@ final class Redirect implements MiddlewareInterface
         }
 
         if (!isset($this->redirects[$uri])) {
-            return $delegate->process($request);
+            return $handler->handle($request);
         }
 
         if (!in_array($request->getMethod(), $this->method)) {
@@ -93,7 +93,7 @@ final class Redirect implements MiddlewareInterface
     /**
      * Determine the response code according with the method and the permanent config
      * @param  ServerRequestInterface $request
-     * @return integer
+     * @return int
      */
     private function determineResponseCode(ServerRequestInterface $request)
     {
