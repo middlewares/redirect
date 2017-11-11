@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Middlewares;
 
@@ -32,30 +33,27 @@ final class Redirect implements MiddlewareInterface
     }
 
     /**
-     * @param  bool  $permanent
-     * @return $this
+     * Whether return a permanent redirect.
      */
-    public function permanent($permanent = true)
+    public function permanent(bool $permanent = true): self
     {
         $this->permanent = $permanent;
         return $this;
     }
 
     /**
-     * @param  bool  $query
-     * @return $this
+     * Whether include the query to search the url
      */
-    public function query($query = true)
+    public function query(bool $query = true): self
     {
         $this->query = $query;
         return $this;
     }
 
     /**
-     * @param  array $method
-     * @return $this
+     * Configure the methods in which make the redirection
      */
-    public function method(array $method)
+    public function method(array $method): self
     {
         $this->method = $method;
         return $this;
@@ -63,13 +61,8 @@ final class Redirect implements MiddlewareInterface
 
     /**
      * Process a request and return a response.
-     *
-     * @param ServerRequestInterface  $request
-     * @param RequestHandlerInterface $handler
-     *
-     * @return ResponseInterface
      */
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler)
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
@@ -92,10 +85,8 @@ final class Redirect implements MiddlewareInterface
 
     /**
      * Determine the response code according with the method and the permanent config
-     * @param  ServerRequestInterface $request
-     * @return int
      */
-    private function determineResponseCode(ServerRequestInterface $request)
+    private function determineResponseCode(ServerRequestInterface $request): int
     {
         if (in_array($request->getMethod(), ['GET', 'HEAD', 'CONNECT', 'TRACE', 'OPTIONS'])) {
             return $this->permanent ? 301 : 302;
