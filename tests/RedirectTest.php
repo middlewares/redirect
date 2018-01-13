@@ -1,116 +1,137 @@
 <?php
+declare(strict_types = 1);
 
 namespace Middlewares\Tests;
 
+use InvalidArgumentException;
 use Middlewares\Redirect;
 use Middlewares\Utils\Dispatcher;
 use Middlewares\Utils\Factory;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ServerRequestInterface;
-use Zend\Diactoros\Uri;
 
 class RedirectTest extends TestCase
 {
-    public function provideRequests()
+    public function testUnknowUrl()
     {
-        $redirects = [
-            '/foo' => '/bar',
-            '/posts?id=133' => '/post/133',
-        ];
-
-        yield [
-            new Redirect($redirects),
-            Factory::createServerRequest()->withUri(new Uri('/')),
-            200,
-            [],
-        ];
-
-        yield [
-            new Redirect($redirects),
-            Factory::createServerRequest()->withUri(new Uri('/foo')),
-            301,
+        $response = Dispatcher::run(
             [
-                'Location' => ['/bar'],
+                new Redirect(['/foo' => '/bar']),
             ],
-        ];
+            Factory::createServerRequest([], 'GET', '/')
+        );
 
-        yield [
-            (new Redirect($redirects))->permanent(false),
-            Factory::createServerRequest()->withUri(new Uri('/foo')),
-            302,
-            [
-                'Location' => ['/bar'],
-            ],
-        ];
-
-        yield [
-            new Redirect($redirects),
-            Factory::createServerRequest()->withUri(new Uri('/foo?bar')),
-            200,
-            [],
-        ];
-
-        yield [
-            (new Redirect($redirects))->query(false),
-            Factory::createServerRequest()->withUri(new Uri('/foo?bar')),
-            301,
-            [
-                'Location' => ['/bar'],
-            ],
-        ];
-
-        yield [
-            (new Redirect($redirects))->query(false),
-            Factory::createServerRequest()->withUri(new Uri('/posts?id=133')),
-            200,
-            [],
-        ];
-
-        yield [
-            new Redirect($redirects),
-            Factory::createServerRequest()->withUri(new Uri('/posts?id=133')),
-            301,
-            [
-                'Location' => ['/post/133'],
-            ],
-        ];
-
-        yield [
-            new Redirect($redirects),
-            Factory::createServerRequest()->withUri(new Uri('/foo'))->withMethod('PUT'),
-            405,
-            [],
-        ];
-
-        yield [
-            (new Redirect($redirects))->method(['GET', 'POST']),
-            Factory::createServerRequest()->withUri(new Uri('/foo'))->withMethod('POST'),
-            308,
-            [
-                'Location' => ['/bar'],
-            ],
-        ];
-
-        yield [
-            (new Redirect($redirects))->method(['GET', 'POST'])->permanent(false),
-            Factory::createServerRequest()->withUri(new Uri('/foo'))->withMethod('POST'),
-            307,
-            [
-                'Location' => ['/bar'],
-            ],
-        ];
+        $this->assertSame(200, $response->getStatusCode());
     }
 
-    /**
-     * @dataProvider provideRequests
-     * @param mixed $expectedCode
-     * @param mixed $expectedHeaders
-     */
-    public function testRedirect(Redirect $redirect, ServerRequestInterface $request, $expectedCode, $expectedHeaders)
+    public function testRedirect()
     {
-        $response = Dispatcher::run([$redirect], $request);
+        $response = Dispatcher::run(
+            [
+                new Redirect(['/foo' => '/bar']),
+            ],
+            Factory::createServerRequest([], 'GET', '/foo')
+        );
 
-        $this->assertSame($expectedCode, $response->getStatusCode());
-        $this->assertSame($expectedHeaders, $response->getHeaders());
+        $this->assertSame(301, $response->getStatusCode());
+        $this->assertSame('/bar', $response->getHeaderLine('Location'));
+    }
+
+    public function testPermanentRedirect()
+    {
+        $response = Dispatcher::run(
+            [
+                (new Redirect(['/foo' => '/bar']))
+                    ->permanent(),
+            ],
+            Factory::createServerRequest([], 'GET', '/foo')
+        );
+
+        $this->assertSame(301, $response->getStatusCode());
+        $this->assertSame('/bar', $response->getHeaderLine('Location'));
+    }
+
+    public function testQuery()
+    {
+        $response = Dispatcher::run(
+            [
+                new Redirect(['/foo' => '/bar']),
+            ],
+            Factory::createServerRequest([], 'GET', '/foo?bar')
+        );
+
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testIgnoreQuery()
+    {
+        $response = Dispatcher::run(
+            [
+                (new Redirect(['/foo' => '/bar']))->query(false),
+            ],
+            Factory::createServerRequest([], 'GET', '/foo?bar')
+        );
+
+        $this->assertSame(301, $response->getStatusCode());
+        $this->assertSame('/bar', $response->getHeaderLine('Location'));
+    }
+
+    public function testQueryMatch()
+    {
+        $response = Dispatcher::run(
+            [
+                new Redirect(['/posts?id=133' => '/post/133']),
+            ],
+            Factory::createServerRequest([], 'GET', '/posts?id=133')
+        );
+
+        $this->assertSame(301, $response->getStatusCode());
+        $this->assertSame('/post/133', $response->getHeaderLine('Location'));
+    }
+
+    public function testInvalidPutMethod()
+    {
+        $response = Dispatcher::run(
+            [
+                new Redirect(['/foo' => '/bar']),
+            ],
+            Factory::createServerRequest([], 'PUT', '/foo')
+        );
+
+        $this->assertSame(405, $response->getStatusCode());
+    }
+
+    public function testRedirectPostMethod()
+    {
+        $response = Dispatcher::run(
+            [
+                (new Redirect(['/foo' => '/bar']))->method(['GET', 'POST']),
+            ],
+            Factory::createServerRequest([], 'POST', '/foo')
+        );
+
+        $this->assertSame(308, $response->getStatusCode());
+        $this->assertSame('/bar', $response->getHeaderLine('Location'));
+    }
+
+    public function testTemporaryRedirectPostMethod()
+    {
+        $response = Dispatcher::run(
+            [
+                (new Redirect(['/foo' => '/bar']))
+                    ->method(['GET', 'POST'])
+                    ->permanent(false),
+            ],
+            Factory::createServerRequest([], 'POST', '/foo')
+        );
+
+        $this->assertSame(307, $response->getStatusCode());
+        $this->assertSame('/bar', $response->getHeaderLine('Location'));
+    }
+
+    public function testInvalidArgumentException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Redirect('not-valid');
     }
 }
