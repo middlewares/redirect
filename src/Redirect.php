@@ -4,12 +4,12 @@ declare(strict_types = 1);
 namespace Middlewares;
 
 use ArrayAccess;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use InvalidArgumentException;
 use Middlewares\Utils\Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 final class Redirect implements MiddlewareInterface
 {
