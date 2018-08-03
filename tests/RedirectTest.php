@@ -17,7 +17,7 @@ class RedirectTest extends TestCase
             [
                 new Redirect(['/foo' => '/bar']),
             ],
-            Factory::createServerRequest([], 'GET', '/')
+            Factory::createServerRequest('GET', '/')
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -29,7 +29,7 @@ class RedirectTest extends TestCase
             [
                 new Redirect(['/foo' => '/bar']),
             ],
-            Factory::createServerRequest([], 'GET', '/foo')
+            Factory::createServerRequest('GET', '/foo')
         );
 
         $this->assertSame(301, $response->getStatusCode());
@@ -43,7 +43,7 @@ class RedirectTest extends TestCase
                 (new Redirect(['/foo' => '/bar']))
                     ->permanent(),
             ],
-            Factory::createServerRequest([], 'GET', '/foo')
+            Factory::createServerRequest('GET', '/foo')
         );
 
         $this->assertSame(301, $response->getStatusCode());
@@ -56,7 +56,7 @@ class RedirectTest extends TestCase
             [
                 new Redirect(['/foo' => '/bar']),
             ],
-            Factory::createServerRequest([], 'GET', '/foo?bar')
+            Factory::createServerRequest('GET', '/foo?bar')
         );
 
         $this->assertSame(200, $response->getStatusCode());
@@ -68,7 +68,7 @@ class RedirectTest extends TestCase
             [
                 (new Redirect(['/foo' => '/bar']))->query(false),
             ],
-            Factory::createServerRequest([], 'GET', '/foo?bar')
+            Factory::createServerRequest('GET', '/foo?bar')
         );
 
         $this->assertSame(301, $response->getStatusCode());
@@ -81,7 +81,7 @@ class RedirectTest extends TestCase
             [
                 new Redirect(['/posts?id=133' => '/post/133']),
             ],
-            Factory::createServerRequest([], 'GET', '/posts?id=133')
+            Factory::createServerRequest('GET', '/posts?id=133')
         );
 
         $this->assertSame(301, $response->getStatusCode());
@@ -94,7 +94,7 @@ class RedirectTest extends TestCase
             [
                 new Redirect(['/foo' => '/bar']),
             ],
-            Factory::createServerRequest([], 'PUT', '/foo')
+            Factory::createServerRequest('PUT', '/foo')
         );
 
         $this->assertSame(405, $response->getStatusCode());
@@ -106,7 +106,7 @@ class RedirectTest extends TestCase
             [
                 (new Redirect(['/foo' => '/bar']))->method(['GET', 'POST']),
             ],
-            Factory::createServerRequest([], 'POST', '/foo')
+            Factory::createServerRequest('POST', '/foo')
         );
 
         $this->assertSame(308, $response->getStatusCode());
@@ -121,7 +121,7 @@ class RedirectTest extends TestCase
                     ->method(['GET', 'POST'])
                     ->permanent(false),
             ],
-            Factory::createServerRequest([], 'POST', '/foo')
+            Factory::createServerRequest('POST', '/foo')
         );
 
         $this->assertSame(307, $response->getStatusCode());
