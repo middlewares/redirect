@@ -54,6 +54,9 @@ Take the query part of the URI into account when matching redirects. (Default: `
 
 Array with allow HTTP request methods. (Default: `['GET']`.)
 
+#### `responseFactory(Psr\Http\Message\ResponseFactoryInterface $responseFactory)`
+
+A PSR-17 factory to create redirect responses.
 ---
 
 Please see [CHANGELOG](CHANGELOG.md) for more information about recent changes and [CONTRIBUTING](CONTRIBUTING.md) for contributing details.
