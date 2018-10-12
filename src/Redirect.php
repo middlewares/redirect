@@ -6,6 +6,8 @@ namespace Middlewares;
 use ArrayAccess;
 use InvalidArgumentException;
 use Middlewares\Utils\Traits\HasResponseFactory;
+use Middlewares\Utils\Factory;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -23,7 +25,7 @@ final class Redirect implements MiddlewareInterface
     /**
      * @param array|ArrayAccess $redirects [from => to]
      */
-    public function __construct($redirects)
+    public function __construct($redirects, ResponseFactoryInterface $responseFactory = null)
     {
         if (!is_array($redirects) && !($redirects instanceof ArrayAccess)) {
             throw new InvalidArgumentException(
@@ -32,6 +34,7 @@ final class Redirect implements MiddlewareInterface
         }
 
         $this->redirects = $redirects;
+        $this->responseFactory = $responseFactory ?: Factory::getResponseFactory();
     }
 
     /**
