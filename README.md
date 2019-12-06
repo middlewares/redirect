@@ -5,13 +5,12 @@
 [![Build Status][ico-travis]][link-travis]
 [![Quality Score][ico-scrutinizer]][link-scrutinizer]
 [![Total Downloads][ico-downloads]][link-downloads]
-[![SensioLabs Insight][ico-sensiolabs]][link-sensiolabs]
 
 Middleware to redirect old urls to new urls SEO friendly.
 
 ## Requirements
 
-* PHP >= 7.0
+* PHP >= 7.2
 * A [PSR-7 http library](https://github.com/middlewares/awesome-psr15-middlewares#psr-7-implementations)
 * A [PSR-15 middleware dispatcher](https://github.com/middlewares/awesome-psr15-middlewares#dispatcher)
 
@@ -26,37 +25,59 @@ composer require middlewares/redirect
 ## Example
 
 ```php
-$dispatcher = new Dispatcher([
-	(new Middlewares\Redirect(['/old-url' => '/new-url']))
-		->permanent(false)
-		->query(false)
-		->method(['GET', 'POST'])
+Dispatcher::run([
+	new Middlewares\Redirect(['/old-url' => '/new-url'])
 ]);
-
-$response = $dispatcher->dispatch(new ServerRequest());
 ```
 
-## Options
+## Usage
 
-#### `__construct(array|ArrayAccess $redirects)`
+You can use an array or an object extending `ArrayAccess` interface with the urls to redirect, the key is the old url and the value the new.
 
-The list of urls that must be redirected. It can be an array or an object implementing the `ArrayAccess` interface.
+```php
+$redirections = [
+	'/corporative-info' => '/about-us',
+	'/post/2390' => '/post/new-psr15-middlewares',
+];
 
-#### `permanent(bool $permanent)`
+$redirect = new Middlewares\Redirect($redirections);
+```
 
-Use temporary or permanent redirection HTTP status code for the response. (Default: `true`.)
+Optionally, you can provide a `Psr\Http\Message\ResponseFactoryInterface` as the second argument to create the redirect responses. If it's not defined, [Middleware\Utils\Factory](https://github.com/middlewares/utils#factory) will be used to detect it automatically.
 
-#### `query(bool $query)`
+```php
+$responseFactory = new MyOwnResponseFactory();
 
-Take the query part of the URI into account when matching redirects. (Default: `true`.)
+$redirect = new Middlewares\Redirect($redirections, $responseFactory);
+```
 
-#### `method(array $methods)`
+### permanent
 
-Array with allow HTTP request methods. (Default: `['GET']`.)
+Use temporary or permanent redirection HTTP status code for the response. Enabled by default.
 
-#### `responseFactory(Psr\Http\Message\ResponseFactoryInterface $responseFactory)`
+```php
+//Temporary redirections (302)
+$redirect = (new Middlewares\Redirect($redirections))->permanent(false);
+```
 
-A PSR-17 factory to create redirect responses.
+### query
+
+Take the query part of the URI into account when matching redirects. Enabled by default.
+
+```php
+//Ignore url query
+$redirect = (new Middlewares\Redirect($redirections))->query(false);
+```
+
+### method
+
+This option accepts an array with the allowed HTTP request methods. (By default is: `['GET']`.)
+
+```php
+//Redirects GET and HEAD requests
+$redirect = (new Middlewares\Redirect($redirections))->method(['GET', 'HEAD']);
+```
+
 ---
 
 Please see [CHANGELOG](CHANGELOG.md) for more information about recent changes and [CONTRIBUTING](CONTRIBUTING.md) for contributing details.
@@ -68,10 +89,8 @@ The MIT License (MIT). Please see [LICENSE](LICENSE) for more information.
 [ico-travis]: https://img.shields.io/travis/middlewares/redirect/master.svg?style=flat-square
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/g/middlewares/redirect.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/middlewares/redirect.svg?style=flat-square
-[ico-sensiolabs]: https://img.shields.io/sensiolabs/i/{project_id_here}.svg?style=flat-square
 
 [link-packagist]: https://packagist.org/packages/middlewares/redirect
 [link-travis]: https://travis-ci.org/middlewares/redirect
 [link-scrutinizer]: https://scrutinizer-ci.com/g/middlewares/redirect
 [link-downloads]: https://packagist.org/packages/middlewares/redirect
-[link-sensiolabs]: https://insight.sensiolabs.com/projects/e2df0b3f-ee64-4310-91e6-f7e53f024808

@@ -5,7 +5,6 @@ namespace Middlewares;
 
 use ArrayAccess;
 use InvalidArgumentException;
-use Middlewares\Utils\Traits\HasResponseFactory;
 use Middlewares\Utils\Factory;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -15,12 +14,30 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class Redirect implements MiddlewareInterface
 {
-    use HasResponseFactory;
-
+    /**
+     * @var array|ArrayAccess
+     */
     private $redirects = [];
+
+    /**
+     * @var bool
+     */
     private $permanent = true;
+
+    /**
+     * @var bool
+     */
     private $query = true;
+
+    /**
+     * @var string[]
+     */
     private $method = ['GET'];
+
+    /**
+     * @var ResponseFactoryInterface
+     */
+    private $responseFactory;
 
     /**
      * @param array|ArrayAccess $redirects [from => to]
@@ -81,11 +98,12 @@ final class Redirect implements MiddlewareInterface
         }
 
         if (!in_array($request->getMethod(), $this->method)) {
-            return $this->createResponse(405);
+            return $this->responseFactory->createResponse(405);
         }
 
         $responseCode = $this->determineResponseCode($request);
-        return $this->createResponse($responseCode)->withAddedHeader('Location', $this->redirects[$uri]);
+        return $this->responseFactory->createResponse($responseCode)
+            ->withAddedHeader('Location', $this->redirects[$uri]);
     }
 
     /**
