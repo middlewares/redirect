@@ -14,9 +14,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final class Redirect implements MiddlewareInterface
 {
-    /**
-     * @var array|ArrayAccess
-     */
     private $redirects = [];
 
     /**
@@ -40,11 +37,12 @@ final class Redirect implements MiddlewareInterface
     private $responseFactory;
 
     /**
-     * @param array|ArrayAccess $redirects [from => to]
+     * @param array<string,string>|ArrayAccess<string,string> $redirects [from => to]
      */
-    public function __construct($redirects, ResponseFactoryInterface $responseFactory = null)
+    public function __construct($redirects, ?ResponseFactoryInterface $responseFactory = null)
     {
-        if (!is_array($redirects) && !($redirects instanceof ArrayAccess)) {
+        /* @phpstan-ignore-next-line */
+        if (!is_array($redirects) && !$redirects instanceof ArrayAccess) {
             throw new InvalidArgumentException(
                 'The redirects argument must be an array or implement the ArrayAccess interface'
             );
@@ -60,6 +58,7 @@ final class Redirect implements MiddlewareInterface
     public function permanent(bool $permanent = true): self
     {
         $this->permanent = $permanent;
+
         return $this;
     }
 
@@ -69,15 +68,19 @@ final class Redirect implements MiddlewareInterface
     public function query(bool $query = true): self
     {
         $this->query = $query;
+
         return $this;
     }
 
     /**
      * Configure the methods in which make the redirection
+     *
+     * @param string[] $method
      */
     public function method(array $method): self
     {
         $this->method = $method;
+
         return $this;
     }
 
@@ -102,6 +105,7 @@ final class Redirect implements MiddlewareInterface
         }
 
         $responseCode = $this->determineResponseCode($request);
+
         return $this->responseFactory->createResponse($responseCode)
             ->withAddedHeader('Location', $this->redirects[$uri]);
     }
