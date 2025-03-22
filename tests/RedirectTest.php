@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 class RedirectTest extends TestCase
 {
-    public function testUnknowUrl()
+    public function testUnknowUrl(): void
     {
         $response = Dispatcher::run(
             [
@@ -23,7 +23,7 @@ class RedirectTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testRedirect()
+    public function testRedirect(): void
     {
         $response = Dispatcher::run(
             [
@@ -36,7 +36,7 @@ class RedirectTest extends TestCase
         $this->assertSame('/bar', $response->getHeaderLine('Location'));
     }
 
-    public function testPermanentRedirect()
+    public function testPermanentRedirect(): void
     {
         $response = Dispatcher::run(
             [
@@ -50,7 +50,7 @@ class RedirectTest extends TestCase
         $this->assertSame('/bar', $response->getHeaderLine('Location'));
     }
 
-    public function testQuery()
+    public function testQuery(): void
     {
         $response = Dispatcher::run(
             [
@@ -62,7 +62,7 @@ class RedirectTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testIgnoreQuery()
+    public function testIgnoreQuery(): void
     {
         $response = Dispatcher::run(
             [
@@ -75,7 +75,7 @@ class RedirectTest extends TestCase
         $this->assertSame('/bar', $response->getHeaderLine('Location'));
     }
 
-    public function testQueryMatch()
+    public function testQueryMatch(): void
     {
         $response = Dispatcher::run(
             [
@@ -88,7 +88,7 @@ class RedirectTest extends TestCase
         $this->assertSame('/post/133', $response->getHeaderLine('Location'));
     }
 
-    public function testInvalidPutMethod()
+    public function testInvalidPutMethod(): void
     {
         $response = Dispatcher::run(
             [
@@ -100,7 +100,7 @@ class RedirectTest extends TestCase
         $this->assertSame(405, $response->getStatusCode());
     }
 
-    public function testRedirectPostMethod()
+    public function testRedirectPostMethod(): void
     {
         $response = Dispatcher::run(
             [
@@ -113,7 +113,7 @@ class RedirectTest extends TestCase
         $this->assertSame('/bar', $response->getHeaderLine('Location'));
     }
 
-    public function testTemporaryRedirectPostMethod()
+    public function testTemporaryRedirectPostMethod(): void
     {
         $response = Dispatcher::run(
             [
@@ -128,10 +128,11 @@ class RedirectTest extends TestCase
         $this->assertSame('/bar', $response->getHeaderLine('Location'));
     }
 
-    public function testInvalidArgumentException()
+    public function testInvalidArgumentException(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
+        /* @phpstan-ignore-next-line */
         new Redirect('not-valid');
     }
 }
